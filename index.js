@@ -10,8 +10,19 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 const mailchimp = require('@mailchimp/mailchimp_marketing')
 
+const allowlist = ['https://itsajoke.eu', 'https://annee.itsajoke.eu']
+const corsOptionsDelegate = function (req, callback) {
+  var corsOptions;
+  if (allowlist.indexOf(req.header('Origin')) !== -1) {
+    corsOptions = { origin: true } 
+  } else {
+    corsOptions = { origin: false } 
+  }
+  callback(null, corsOptions)
+}
+
 const app = express()
-app.use(cors())
+app.use(cors(corsOptionsDelegate))
 app.use(bodyParser.json())
 
 mailchimp.setConfig({
