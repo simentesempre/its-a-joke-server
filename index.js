@@ -25,7 +25,8 @@ const corsOptionsDelegate = function (req, callback) {
 }
 
 const app = express()
-app.use(cors(corsOptionsDelegate))
+console.log(process.env.NODE_ENV)
+app.use(cors(process.env.NODE_ENV === 'production' && corsOptionsDelegate))
 app.use(bodyParser.json())
 
 mailchimp.setConfig({
