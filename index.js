@@ -25,7 +25,6 @@ const corsOptionsDelegate = function (req, callback) {
 }
 
 const app = express()
-console.log(process.env.NODE_ENV)
 app.use(cors(process.env.NODE_ENV === 'production' && corsOptionsDelegate))
 app.use(bodyParser.json())
 
@@ -35,15 +34,15 @@ mailchimp.setConfig({
 })
 sendgrid.setApiKey(SENDGRID_API_KEY)
 
-const subscribe = async (email, fname = null, group = null) => {
+const subscribe = async (email, fname = '', group = '') => {
+    const merge_fields = {}
+    if(fname !== '') merge_fields.FNAME = fname
+    if(group !== '') merge_fields.GROUP = group
     return new Promise((resolve, reject) => {
         const payload = {
             email_address: email,
             status: "subscribed",
-            merge_fields: {
-              'FNAME': fname,
-              'GROUP': group
-            }
+            merge_fields
         }
         mailchimp.lists.addListMember(MAILCHIMP_LIST_ID, payload)
         .then(res => {
@@ -55,7 +54,7 @@ const subscribe = async (email, fname = null, group = null) => {
     })
 }
 
-const send = async (text, from, name =  null) => {
+const send = async (text, from, name = '') => {
   return new Promise((resolve, reject) => {
       const message = {
           text: `Message from ${from}${name ? `<${name}>` : ''}: ${text}`,
@@ -75,8 +74,8 @@ const send = async (text, from, name =  null) => {
 
 app.post('/newsletter', async (req, res) => {
   if(req.body && req.body.email) {
-    const fname = req.body?.fname ? req.body.fname : null
-    const group = req.body?.group ? req.body.group : null
+    const fname = req.body?.fname ? req.body.fname : ''
+    const group = req.body?.group ? req.body.group : ''
     subscribe(req.body.email, fname, group )
     .then(() => {
         res.status(201).json({ message: 'Email succesfully added.' })
@@ -92,7 +91,7 @@ app.post('/newsletter', async (req, res) => {
 
 app.post('/send', async (req, res) => {
   if(req.body && req.body.text && req.body.from) {
-    const name = req.body?.name ? req.body.name : null
+    const name = req.body?.name ? req.body.name : ''
     send(req.body.text, req.body.from, name)
     .then( _ => {
         res.status(201).json({ message: 'Email succesfully sent.' })
