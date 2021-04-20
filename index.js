@@ -74,9 +74,7 @@ const send = async (text, from, name = '') => {
 
 app.post('/newsletter', async (req, res) => {
   if(req.body && req.body.email) {
-    const fname = req.body?.fname ? req.body.fname : ''
-    const group = req.body?.group ? req.body.group : ''
-    subscribe(req.body.email, fname, group )
+    subscribe(req.body.email, req.body.fname, req.body.group )
     .then(() => {
         res.status(201).json({ message: 'Email succesfully added.' })
     })
@@ -91,8 +89,7 @@ app.post('/newsletter', async (req, res) => {
 
 app.post('/send', async (req, res) => {
   if(req.body && req.body.text && req.body.from) {
-    const name = req.body?.name ? req.body.name : ''
-    send(req.body.text, req.body.from, name)
+    send(req.body.text, req.body.from, req.bodyname)
     .then( _ => {
         res.status(201).json({ message: 'Email succesfully sent.' })
     }, error => {
